@@ -1,4 +1,4 @@
-name: Export Repository ZIP
+name: Export MASTER IBO Engine Source
 
 on:
   push:
@@ -11,10 +11,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Create ZIP
-        run: zip -r "${{ github.event.repository.name }}.zip" . -x '.git/*' '${{ github.event.repository.name }}.zip'
+
+      - name: Extract MASTER IBO v1.2.3
+        run: |
+          rm -rf extracted
+          mkdir -p extracted
+          unzip -q master-ibo-v1.2.3.zip -d extracted
+          find extracted -maxdepth 4 -type f | sort | head -200
+
+      - name: Package extracted source
+        run: |
+          cd extracted
+          zip -r ../master-ibo-v1.2.3-source.zip .
+
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event.repository.name }}-zip
-          path: ${{ github.event.repository.name }}.zip
+          name: master-ibo-v1.2.3-source
+          path: master-ibo-v1.2.3-source.zip
           if-no-files-found: error
+          retention-days: 7
